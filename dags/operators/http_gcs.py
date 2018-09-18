@@ -52,7 +52,7 @@ class HttpToGcsOperator(BaseOperator):
             hook = GoogleCloudStorageHook(
                 google_cloud_storage_conn_id=self.gcs_conn_id)
             hook.upload(
-                bucket=bucket,
+                bucket=self.bucket,
                 object=self.gcs_path,
                 filename=tmp_file_handle.name
             )
