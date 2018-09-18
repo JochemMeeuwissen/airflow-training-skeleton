@@ -38,7 +38,7 @@ for currency in {'EUR', 'USD'}:
         endpoint="airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=" + currency,
         http_conn_id="airflow-training-currency-http",
         gcs_conn_id="airflow-training-storage-bucket",
-        bucket="airflow-training-knab-jochem"
+        bucket="airflow-training-knab-jochem",
         gcs_path="currency/{{ ds }}-" + currency + ".json",
         dag=dag,
     )
