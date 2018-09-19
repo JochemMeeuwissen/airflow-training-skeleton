@@ -34,9 +34,7 @@ def run(argv=None):
     pipeline_options.view_as(SetupOptions).save_main_session = True
     with beam.Pipeline(options=pipeline_options) as p:
         (
-            p
-            | "ReadFromGCS" >> ReadFromText(known_args.input, coder=JsonCoder())
-            | WriteToBigQuery(
+            p | "ReadFromGCS" >> ReadFromText(known_args.input, coder=JsonCoder()) | WriteToBigQuery(
                 "result_table",
                 dataset="result_dataset",
                 project="gdd-airflow-training",
