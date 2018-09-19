@@ -1,7 +1,7 @@
 import datetime as dt
 
 from airflow import DAG
-from airflow.contrib.dataproc_operator import (
+from airflow.contrib.operators.dataproc_operator import (
     DataprocClusterCreateOperator,
     DataProcPySparkOperator,
     DataprocClusterDeleteOperator,
