@@ -51,8 +51,19 @@ dataproc_create_cluster = DataprocClusterCreateOperator(
 )
 
 
+df_to_bq = DataFlowPythonOperator(
+    task_id="land_registry_prices_to_bigquery",
+    dataflow_default_options={
+        "project": "gdd-ea393e48abe0a85089b6b551da",
+        "region": "europe-west1",
+    },
+    py_file="gs://airflow-training-knab-jochem/dataflow_job.py",
+    dag=dag,
+)
+
+
 for currency in {'EUR', 'USD'}:
-    HttpToGcsOperator(
+    s = HttpToGcsOperator(
         task_id="get_currency_" + currency,
         method="GET",
         endpoint="airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=" + currency,
@@ -61,7 +72,9 @@ for currency in {'EUR', 'USD'}:
         bucket="airflow-training-knab-jochem",
         gcs_path="currency/{{ ds }}-" + currency + ".json",
         dag=dag,
-    ) >> dataproc_create_cluster
+    )
+    s >> dataproc_create_cluster
+    s >> df_to_bq
 
 
 compute_aggregates = DataProcPySparkOperator(
@@ -93,19 +106,8 @@ gcs_to_bq = GoogleCloudStorageToBigQueryOperator(
 )
 
 
-df_to_bq = DataFlowPythonOperator(
-    task_id="land_registry_prices_to_bigquery",
-    dataflow_default_options={
-        "project": "gdd-ea393e48abe0a85089b6b551da",
-        "region": "europe-west1",
-    },
-    py_file="gs://airflow-training-knab-jochem/dataflow_job.py",
-    dag=dag,
-)
-
-
 pgsl_to_gcs >> dataproc_create_cluster
 dataproc_create_cluster >> compute_aggregates
 compute_aggregates >> dataproc_delete_cluster
-dataproc_delete_cluster >> df_to_bq
+pgsl_to_gcs >> df_to_bq
 dataproc_delete_cluster >> gcs_to_bq
