@@ -93,7 +93,7 @@ gcs_to_bq = GoogleCloudStorageToBigQueryOperator(
 )
 
 
-dataflow_to_bq = DataFlowPythonOperator(
+df_to_bq = DataFlowPythonOperator(
     task_id="land_registry_prices_to_bigquery",
     dataflow_default_options={
         "project": "gdd-ea393e48abe0a85089b6b551da",
@@ -107,5 +107,5 @@ dataflow_to_bq = DataFlowPythonOperator(
 pgsl_to_gcs >> dataproc_create_cluster
 dataproc_create_cluster >> compute_aggregates
 compute_aggregates >> dataproc_delete_cluster
-dataproc_delete_cluster >> dataflow_to_bq
+dataproc_delete_cluster >> df_to_bq
 dataproc_delete_cluster >> gcs_to_bq
