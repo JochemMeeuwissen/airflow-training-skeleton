@@ -48,7 +48,7 @@ for currency in {'EUR', 'USD'}:
         bucket="airflow-training-knab-jochem",
         gcs_path="currency/{{ ds }}-" + currency + ".json",
         dag=dag,
-    )
+    )>>dataproc_create_cluster
 
 
 dataproc_create_cluster = DataprocClusterCreateOperator(
@@ -78,3 +78,8 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
     project_id="gdd-ea393e48abe0a85089b6b551da",
     trigger_rule=TriggerRule.ALL_DONE,
 )
+
+
+pgsl_to_gcs>>dataproc_create_cluster
+dataproc_create_cluster>>compute_aggregates
+compute_aggregates>>dataproc_delete_cluster
