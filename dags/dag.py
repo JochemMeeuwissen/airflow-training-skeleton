@@ -74,7 +74,6 @@ for currency in {'EUR', 'USD'}:
         dag=dag,
     )
     s >> dataproc_create_cluster
-    s >> df_to_bq
 
 
 compute_aggregates = DataProcPySparkOperator(
@@ -109,5 +108,5 @@ gcs_to_bq = GoogleCloudStorageToBigQueryOperator(
 pgsl_to_gcs >> dataproc_create_cluster
 dataproc_create_cluster >> compute_aggregates
 compute_aggregates >> dataproc_delete_cluster
-pgsl_to_gcs >> df_to_bq
-dataproc_delete_cluster >> gcs_to_bq
+dataproc_create_cluster >> df_to_bq
+compute_aggregates >> gcs_to_bq
