@@ -16,16 +16,16 @@ def run(argv=None):
     parser.add_argument(
         "--input",
         dest="input",
-        default="gs://airflow-training-data/land_registry_price_paid_uk/*/*.json",
+        default="gs://airflow-training-knab-jochem/land_registry_price_paid_uk/*/*.json",
         help="Input file to process.",
     )
     known_args, pipeline_args = parser.parse_known_args(argv)
     pipeline_args.extend(
         [
             "--runner=DataflowRunner",
-            "--project=gdd-airflow-training",
-            "--staging_location=gs://airflow-training-data/dataflow-staging",
-            "--temp_location=gs://airflow-training-data/dataflow-temp",
+            "--project=gdd-ea393e48abe0a85089b6b551da",
+            "--staging_location=gs://airflow-training-knab-jochem/dataflow-staging",
+            "--temp_location=gs://airflow-training-knab-jochem/dataflow-temp",
             "--job_name=gcs-gzcomp-to-bq1",
         ]
     )
@@ -37,7 +37,7 @@ def run(argv=None):
             p | "ReadFromGCS" >> ReadFromText(known_args.input, coder=JsonCoder()) | WriteToBigQuery(
                 "result_table",
                 dataset="result_dataset",
-                project="gdd-airflow-training",
+                project="gdd-ea393e48abe0a85089b6b551da",
                 schema="city:string, county:string, district:string, duration:string, locality:string, newly_built:boolean, paon:string, postcode:string, ppd_category_type:string, price:numeric, property_type:string, record_status:string, saon:string, street:string, transaction:string, transfer_date:numeric",
                 create_disposition=BigQueryDisposition.CREATE_IF_NEEDED,
             )
