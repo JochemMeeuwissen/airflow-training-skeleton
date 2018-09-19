@@ -1,6 +1,7 @@
 import datetime as dt
 
 from airflow import DAG
+from airflow.contrib.operators.dataflow_operator import DataFlowPythonOperator
 from airflow.contrib.operators.dataproc_operator import (
     DataprocClusterCreateOperator,
     DataProcPySparkOperator,
@@ -8,6 +9,7 @@ from airflow.contrib.operators.dataproc_operator import (
 )
 from airflow.utils.trigger_rule import TriggerRule
 from godatadriven.operators.postgres_to_gcs import PostgresToGoogleCloudStorageOperator
+from godatadriven.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
 from operators.http_gcs import HttpToGcsOperator
 
 
@@ -80,6 +82,30 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
 )
 
 
+gcs_to_bq = GoogleCloudStorageToBigQueryOperator(
+    task_id="write_to_bq",
+    bucket="airflow-training-knab-jochem",
+    source_objects=["average_prices/transfer_date={{ ds }}/*"],
+    destination_project_dataset_table="gdd-ea393e48abe0a85089b6b551da:prices.land_registry_price${{ ds_nodash }}",
+    source_format="PARQUET",
+    write_disposition="WRITE_TRUNCATE",
+    dag=dag,
+)
+
+
+dataflow_to_bq = DataFlowPythonOperator(
+    task_id="land_registry_prices_to_bigquery",
+    dataflow_default_options={
+        "project": "gdd-ea393e48abe0a85089b6b551da",
+        "region": "europe-west1",
+    },
+    py_file="gs://airflow-training-knab-jochem/dataflow_job.py",
+    dag=dag,
+)
+
+
 pgsl_to_gcs >> dataproc_create_cluster
 dataproc_create_cluster >> compute_aggregates
 compute_aggregates >> dataproc_delete_cluster
+dataproc_delete_cluster >> dataflow_to_bq
+dataproc_delete_cluster >> gcs_to_bq
