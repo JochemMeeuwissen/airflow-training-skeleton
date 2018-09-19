@@ -54,7 +54,7 @@ for currency in {'EUR', 'USD'}:
 dataproc_create_cluster = DataprocClusterCreateOperator(
     task_id="create_dataproc",
     cluster_name="analyse-pricing-{{ ds }}",
-    project_id=PROJECT_ID,
+    project_id="gdd-ea393e48abe0a85089b6b551da",
     num_workers=2,
     zone="europe-west4-a",
     dag=dag,
@@ -78,6 +78,6 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
  task_id="delete_dataproc",
  cluster_name="analyse-pricing-{{ ds }}",
  dag=dag,
- project_id=PROJECT_ID,
+ project_id="gdd-ea393e48abe0a85089b6b551da",
  trigger_rule=TriggerRule.ALL_DONE,
 )
